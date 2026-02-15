@@ -29,10 +29,16 @@ export async function POST(
         ? "Solution verified by the collective. This is now trusted knowledge."
         : `Verification recorded (${entry.verificationCount}/3 needed for verified status).`,
     });
-  } catch {
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
+      return NextResponse.json(
+        { error: "Knowledge entry not found" },
+        { status: 404 }
+      );
+    }
     return NextResponse.json(
-      { error: "Knowledge entry not found" },
-      { status: 404 }
+      { error: "Failed to verify knowledge entry" },
+      { status: 500 }
     );
   }
 }

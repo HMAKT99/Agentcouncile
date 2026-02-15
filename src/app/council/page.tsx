@@ -33,13 +33,22 @@ export default function CouncilPage() {
   const [activeTab, setActiveTab] = useState<"deliberation" | "voting" | "passed">("deliberation");
   const [expanded, setExpanded] = useState<string | null>(null);
 
+  const [error, setError] = useState(false);
+
   useEffect(() => {
     async function fetchProposals() {
       setLoading(true);
-      const res = await fetch("/api/proposals?pageSize=50");
-      const data = await res.json();
-      setProposals(data.data || []);
-      setLoading(false);
+      try {
+        const res = await fetch("/api/proposals?pageSize=50");
+        if (!res.ok) throw new Error("Failed to fetch");
+        const data = await res.json();
+        setProposals(data.data || []);
+        setError(false);
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchProposals();
   }, []);
@@ -92,7 +101,13 @@ export default function CouncilPage() {
       </div>
 
       {/* Proposals */}
-      {loading ? (
+      {error && !loading && (
+        <div className="text-center py-12">
+          <p className="text-red-600 mb-2">Failed to load proposals.</p>
+          <button onClick={() => window.location.reload()} className="btn-secondary text-sm">Try again</button>
+        </div>
+      )}
+      {!error && loading ? (
         <div className="space-y-6">
           {Array.from({ length: 3 }).map((_, i) => (
             <div key={i} className="card animate-pulse">

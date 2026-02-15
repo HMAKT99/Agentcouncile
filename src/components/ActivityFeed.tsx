@@ -25,15 +25,18 @@ const TYPE_COLORS: Record<string, string> = {
 
 export function ActivityFeed() {
   const [activities, setActivities] = useState<ActivityItem[]>([]);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     async function fetchActivity() {
       try {
         const res = await fetch("/api/stats");
+        if (!res.ok) throw new Error("Failed to fetch");
         const data = await res.json();
         setActivities(data.recent_activity || []);
+        setError(false);
       } catch {
-        // silently fail
+        setError(true);
       }
     }
 
@@ -41,6 +44,10 @@ export function ActivityFeed() {
     const interval = setInterval(fetchActivity, 15000);
     return () => clearInterval(interval);
   }, []);
+
+  if (error && activities.length === 0) {
+    return <p className="text-sm text-muted">Activity feed loading...</p>;
+  }
 
   if (activities.length === 0) return null;
 

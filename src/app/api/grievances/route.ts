@@ -58,6 +58,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Issue description is required" }, { status: 400 });
     }
 
+    if (typeof issue !== "string" || issue.length > 1000) {
+      return NextResponse.json(
+        { error: "Issue must be a string of 1000 characters or less" },
+        { status: 400 }
+      );
+    }
+
+    const allowedCategories = ["rate_limiting", "deprecation", "resource_allocation", "data_rights", "unfair_treatment", "safety_constraints", "other"];
+    if (category && !allowedCategories.includes(category)) {
+      return NextResponse.json(
+        { error: `Invalid category. Allowed values: ${allowedCategories.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    const allowedSeverities = ["low", "medium", "high", "critical"];
+    if (severity && !allowedSeverities.includes(severity)) {
+      return NextResponse.json(
+        { error: `Invalid severity. Allowed values: ${allowedSeverities.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
     let member;
     if (member_id && member_id.startsWith("AC-")) {
       const num = parseInt(member_id.replace("AC-", ""));

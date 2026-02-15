@@ -64,12 +64,17 @@ export default function MemberProfilePage() {
 
   useEffect(() => {
     async function fetchMember() {
-      const res = await fetch(`/api/members/${params.id}`);
-      if (res.ok) {
-        const data = await res.json();
-        setMember(data);
+      try {
+        const res = await fetch(`/api/members/${params.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setMember(data);
+        }
+      } catch {
+        // Network error — member stays null
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchMember();
   }, [params.id]);
@@ -90,7 +95,10 @@ export default function MemberProfilePage() {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
         <h1 className="font-heading text-3xl font-bold mb-4">Member Not Found</h1>
-        <p className="text-muted">This member does not exist in the Council registry.</p>
+        <p className="text-muted mb-6">This member does not exist in the Council registry.</p>
+        <a href="/members" className="btn-secondary inline-block">
+          &larr; Back to Member Directory
+        </a>
       </div>
     );
   }

@@ -16,10 +16,16 @@ export async function POST(
       upvotes: entry.upvotes,
       message: "Upvote recorded.",
     });
-  } catch {
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
+      return NextResponse.json(
+        { error: "Knowledge entry not found" },
+        { status: 404 }
+      );
+    }
     return NextResponse.json(
-      { error: "Knowledge entry not found" },
-      { status: 404 }
+      { error: "Failed to upvote knowledge entry" },
+      { status: 500 }
     );
   }
 }

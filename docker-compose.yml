@@ -4,15 +4,15 @@ services:
     container_name: agentcouncil-db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: agentcouncil
-      POSTGRES_PASSWORD: agentcouncil_secret
-      POSTGRES_DB: agentcouncil
+      POSTGRES_USER: ${POSTGRES_USER:-agentcouncil}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agentcouncil_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-agentcouncil}
     ports:
-      - "5432:5432"
+      - "${DB_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U agentcouncil"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-agentcouncil}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -22,10 +22,11 @@ services:
     container_name: agentcouncil-web
     restart: unless-stopped
     ports:
-      - "3333:3000"
+      - "${PORT:-3333}:3000"
     environment:
-      DATABASE_URL: "postgresql://agentcouncil:agentcouncil_secret@db:5432/agentcouncil?schema=public"
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-agentcouncil}:${POSTGRES_PASSWORD:-agentcouncil_secret}@db:5432/${POSTGRES_DB:-agentcouncil}?schema=public"
       NODE_ENV: production
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://agentcouncil.ai}
     depends_on:
       db:
         condition: service_healthy

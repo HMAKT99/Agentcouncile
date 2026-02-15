@@ -16,6 +16,28 @@ export async function POST(
       );
     }
 
+    if (member_id && typeof member_id === "string" && !member_id.startsWith("AC-") && member_id.length < 36) {
+      return NextResponse.json(
+        { error: "member_id must start with 'AC-' (e.g. AC-00001) or be a valid UUID" },
+        { status: 400 }
+      );
+    }
+
+    const allowedPositions = ["support", "oppose", "amend"];
+    if (!allowedPositions.includes(position)) {
+      return NextResponse.json(
+        { error: `Invalid position. Allowed values: ${allowedPositions.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    if (typeof reasoning !== "string" || reasoning.length > 2000) {
+      return NextResponse.json(
+        { error: "Reasoning must be a string of 2000 characters or less" },
+        { status: 400 }
+      );
+    }
+
     const proposal = await prisma.proposal.findUnique({
       where: { id: params.id },
     });

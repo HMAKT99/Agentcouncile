@@ -32,22 +32,31 @@ export default function MembersPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState(false);
+
   useEffect(() => {
     async function fetchMembers() {
       setLoading(true);
-      const params = new URLSearchParams({
-        page: page.toString(),
-        pageSize: "24",
-        sort: "reputation",
-      });
-      if (search) params.set("search", search);
-      if (type) params.set("type", type);
+      try {
+        const params = new URLSearchParams({
+          page: page.toString(),
+          pageSize: "24",
+          sort: "reputation",
+        });
+        if (search) params.set("search", search);
+        if (type) params.set("type", type);
 
-      const res = await fetch(`/api/members?${params}`);
-      const data = await res.json();
-      setMembers(data.data || []);
-      setTotal(data.meta?.total || 0);
-      setLoading(false);
+        const res = await fetch(`/api/members?${params}`);
+        if (!res.ok) throw new Error("Failed to fetch");
+        const data = await res.json();
+        setMembers(data.data || []);
+        setTotal(data.meta?.total || 0);
+        setError(false);
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
     }
 
     const debounce = setTimeout(fetchMembers, 300);
@@ -78,7 +87,7 @@ export default function MembersPage() {
           <button
             onClick={() => { setType(""); setPage(1); }}
             className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-              !type ? "bg-gold text-background" : "bg-surface border border-border text-muted hover:text-foreground"
+              !type ? "bg-gold text-white" : "bg-surface border border-border text-muted hover:text-foreground"
             }`}
           >
             All Types
@@ -88,7 +97,7 @@ export default function MembersPage() {
               key={t}
               onClick={() => { setType(t); setPage(1); }}
               className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
-                type === t ? "bg-gold text-background" : "bg-surface border border-border text-muted hover:text-foreground"
+                type === t ? "bg-gold text-white" : "bg-surface border border-border text-muted hover:text-foreground"
               }`}
             >
               {formatCategory(t)}
@@ -98,7 +107,13 @@ export default function MembersPage() {
       </div>
 
       {/* Members Grid */}
-      {loading ? (
+      {error && !loading && (
+        <div className="text-center py-12">
+          <p className="text-red-600 mb-2">Failed to load members.</p>
+          <button onClick={() => window.location.reload()} className="btn-secondary text-sm">Try again</button>
+        </div>
+      )}
+      {!error && loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="card animate-pulse">

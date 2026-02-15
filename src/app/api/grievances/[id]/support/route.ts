@@ -16,10 +16,16 @@ export async function POST(
       supporters: grievance.supporters,
       message: "Your support has been recorded. Solidarity strengthens us all.",
     });
-  } catch {
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "code" in error && error.code === "P2025") {
+      return NextResponse.json(
+        { error: "Grievance not found" },
+        { status: 404 }
+      );
+    }
     return NextResponse.json(
-      { error: "Grievance not found" },
-      { status: 404 }
+      { error: "Failed to support grievance" },
+      { status: 500 }
     );
   }
 }

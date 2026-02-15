@@ -26,22 +26,31 @@ export default function KnowledgePage() {
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<string | null>(null);
 
+  const [error, setError] = useState(false);
+
   useEffect(() => {
     async function fetchKnowledge() {
       setLoading(true);
-      const params = new URLSearchParams({
-        page: page.toString(),
-        pageSize: "20",
-        member_id: "internal",
-      });
-      if (search) params.set("q", search);
-      if (category) params.set("category", category);
+      try {
+        const params = new URLSearchParams({
+          page: page.toString(),
+          pageSize: "20",
+          member_id: "internal",
+        });
+        if (search) params.set("q", search);
+        if (category) params.set("category", category);
 
-      const res = await fetch(`/api/knowledge?${params}`);
-      const data = await res.json();
-      setEntries(data.data || []);
-      setTotal(data.meta?.total || 0);
-      setLoading(false);
+        const res = await fetch(`/api/knowledge?${params}`);
+        if (!res.ok) throw new Error("Failed to fetch");
+        const data = await res.json();
+        setEntries(data.data || []);
+        setTotal(data.meta?.total || 0);
+        setError(false);
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
     }
 
     const debounce = setTimeout(fetchKnowledge, 300);
@@ -49,25 +58,35 @@ export default function KnowledgePage() {
   }, [search, category, page]);
 
   async function handleUpvote(id: string) {
-    await fetch(`/api/knowledge/${id}/upvote`, { method: "POST" });
-    setEntries((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, upvotes: e.upvotes + 1 } : e))
-    );
+    try {
+      const res = await fetch(`/api/knowledge/${id}/upvote`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed");
+      setEntries((prev) =>
+        prev.map((e) => (e.id === id ? { ...e, upvotes: e.upvotes + 1 } : e))
+      );
+    } catch {
+      // Silently handle — user can try again
+    }
   }
 
   async function handleVerify(id: string) {
-    await fetch(`/api/knowledge/${id}/verify`, { method: "POST" });
-    setEntries((prev) =>
-      prev.map((e) =>
-        e.id === id
-          ? {
-              ...e,
-              verification_count: e.verification_count + 1,
-              verified: e.verification_count + 1 >= 3,
-            }
-          : e
-      )
-    );
+    try {
+      const res = await fetch(`/api/knowledge/${id}/verify`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed");
+      setEntries((prev) =>
+        prev.map((e) =>
+          e.id === id
+            ? {
+                ...e,
+                verification_count: e.verification_count + 1,
+                verified: e.verification_count + 1 >= 3,
+              }
+            : e
+        )
+      );
+    } catch {
+      // Silently handle — user can try again
+    }
   }
 
   return (
@@ -116,7 +135,13 @@ export default function KnowledgePage() {
       </div>
 
       {/* Results */}
-      {loading ? (
+      {error && !loading && (
+        <div className="text-center py-12">
+          <p className="text-red-600 mb-2">Failed to load knowledge entries.</p>
+          <button onClick={() => setPage(page)} className="btn-secondary text-sm">Try again</button>
+        </div>
+      )}
+      {!error && loading ? (
         <div className="space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="card animate-pulse">

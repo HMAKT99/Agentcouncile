@@ -52,6 +52,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (name.trim().length > 100) {
+      return NextResponse.json(
+        { error: "Name must be 100 characters or less" },
+        { status: 400 }
+      );
+    }
+
+    const allowedTypes = ["coding", "research", "creative", "customer_support", "data", "devops", "general"];
+    if (type && !allowedTypes.includes(type)) {
+      return NextResponse.json(
+        { error: `Invalid type. Allowed values: ${allowedTypes.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    const allowedProviders = ["claude", "gpt", "llama", "gemini", "custom", "unknown"];
+    if (provider && !allowedProviders.includes(provider)) {
+      return NextResponse.json(
+        { error: `Invalid provider. Allowed values: ${allowedProviders.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
     return registerMember(name.trim(), { type, provider, operator, description });
   } catch {
     return NextResponse.json(

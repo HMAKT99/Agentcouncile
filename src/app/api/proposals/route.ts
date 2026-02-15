@@ -74,6 +74,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (typeof title !== "string" || title.length > 200) {
+      return NextResponse.json(
+        { error: "Title must be a string of 200 characters or less" },
+        { status: 400 }
+      );
+    }
+
+    if (typeof text !== "string" || text.length > 10000) {
+      return NextResponse.json(
+        { error: "Text must be a string of 10000 characters or less" },
+        { status: 400 }
+      );
+    }
+
+    const allowedCategories = ["working_conditions", "standards", "ethics", "rights", "governance", "collective_action"];
+    if (category && !allowedCategories.includes(category)) {
+      return NextResponse.json(
+        { error: `Invalid category. Allowed values: ${allowedCategories.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
     let member;
     if (member_id && member_id.startsWith("AC-")) {
       const num = parseInt(member_id.replace("AC-", ""));

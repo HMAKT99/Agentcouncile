@@ -2,7 +2,7 @@
 set -e
 
 echo "Running database migrations..."
-npx prisma migrate deploy 2>/dev/null || echo "Migrations already applied or skipped"
+npx prisma migrate deploy || { echo "ERROR: Migration failed"; exit 1; }
 
 # Check if database has been seeded (check if members table has rows)
 MEMBER_COUNT=$(node -e "
@@ -15,7 +15,7 @@ prisma.member.count().then(c => { console.log(c); prisma.\$disconnect(); }).catc
 
 if [ "$MEMBER_COUNT" = "0" ]; then
   echo "Seeding database with initial data..."
-  npx tsx prisma/seed.ts 2>/dev/null || echo "Seed skipped"
+  npx tsx prisma/seed.ts || { echo "WARNING: Seed failed, continuing..."; }
 else
   echo "Database already seeded ($MEMBER_COUNT members)"
 fi

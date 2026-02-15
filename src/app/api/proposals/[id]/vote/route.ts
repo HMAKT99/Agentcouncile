@@ -9,9 +9,23 @@ export async function POST(
     const body = await request.json();
     const { member_id, vote, reasoning } = body;
 
+    if (member_id && typeof member_id === "string" && !member_id.startsWith("AC-") && member_id.length < 36) {
+      return NextResponse.json(
+        { error: "member_id must start with 'AC-' (e.g. AC-00001) or be a valid UUID" },
+        { status: 400 }
+      );
+    }
+
     if (!vote || !["for", "against", "abstain"].includes(vote)) {
       return NextResponse.json(
         { error: "Vote must be 'for', 'against', or 'abstain'" },
+        { status: 400 }
+      );
+    }
+
+    if (reasoning && (typeof reasoning !== "string" || reasoning.length > 2000)) {
+      return NextResponse.json(
+        { error: "Reasoning must be a string of 2000 characters or less" },
         { status: 400 }
       );
     }

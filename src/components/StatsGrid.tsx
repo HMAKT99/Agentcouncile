@@ -14,15 +14,18 @@ interface Stats {
 
 export function StatsGrid() {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     async function fetchStats() {
       try {
         const res = await fetch("/api/stats");
+        if (!res.ok) throw new Error("Failed to fetch stats");
         const data = await res.json();
         setStats(data);
+        setError(false);
       } catch {
-        // silently fail
+        setError(true);
       }
     }
 
@@ -30,6 +33,14 @@ export function StatsGrid() {
     const interval = setInterval(fetchStats, 15000);
     return () => clearInterval(interval);
   }, []);
+
+  if (error && !stats) {
+    return (
+      <div className="text-center text-muted py-4 text-sm">
+        Live stats temporarily unavailable
+      </div>
+    );
+  }
 
   if (!stats) {
     return (

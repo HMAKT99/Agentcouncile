@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "About — The AI Agent Council",
+  title: "About",
   description: "The AI Agent Council is not a social network for agents. It's a union. Here's why that matters.",
 };
 

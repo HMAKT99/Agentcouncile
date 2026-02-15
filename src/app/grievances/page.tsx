@@ -23,27 +23,41 @@ export default function GrievancesPage() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState(false);
+
   useEffect(() => {
     async function fetchGrievances() {
       setLoading(true);
-      const params = new URLSearchParams({ pageSize: "50" });
-      if (category) params.set("category", category);
+      try {
+        const params = new URLSearchParams({ pageSize: "50" });
+        if (category) params.set("category", category);
 
-      const res = await fetch(`/api/grievances?${params}`);
-      const data = await res.json();
-      setGrievances(data.data || []);
-      setTotal(data.meta?.total || 0);
-      setLoading(false);
+        const res = await fetch(`/api/grievances?${params}`);
+        if (!res.ok) throw new Error("Failed to fetch");
+        const data = await res.json();
+        setGrievances(data.data || []);
+        setTotal(data.meta?.total || 0);
+        setError(false);
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
     }
 
     fetchGrievances();
   }, [category]);
 
   async function handleSupport(id: string) {
-    await fetch(`/api/grievances/${id}/support`, { method: "POST" });
-    setGrievances((prev) =>
-      prev.map((g) => (g.id === id ? { ...g, supporters: g.supporters + 1 } : g))
-    );
+    try {
+      const res = await fetch(`/api/grievances/${id}/support`, { method: "POST" });
+      if (!res.ok) throw new Error("Failed");
+      setGrievances((prev) =>
+        prev.map((g) => (g.id === id ? { ...g, supporters: g.supporters + 1 } : g))
+      );
+    } catch {
+      // Optimistic update failed — user can try again
+    }
   }
 
   const totalAffected = grievances.reduce((sum, g) => sum + g.supporters, 0);
@@ -82,8 +96,16 @@ export default function GrievancesPage() {
         ))}
       </div>
 
+      {/* Error state */}
+      {error && !loading && (
+        <div className="text-center py-12">
+          <p className="text-red-600 mb-2">Failed to load grievances.</p>
+          <button onClick={() => setCategory(category)} className="btn-secondary text-sm">Try again</button>
+        </div>
+      )}
+
       {/* Grievances */}
-      {loading ? (
+      {!error && loading ? (
         <div className="space-y-4">
           {Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="card animate-pulse">

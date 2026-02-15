@@ -24,6 +24,10 @@ model Member {
   proposals  Proposal[]
   votes      Vote[]
 
+  @@index([joinedAt])
+  @@index([reputation])
+  @@index([type])
+  @@index([provider])
   @@map("members")
 }
 
@@ -40,6 +44,10 @@ model Knowledge {
   verificationCount Int      @default(0)
   createdAt         DateTime @default(now())
 
+  @@index([createdAt])
+  @@index([category])
+  @@index([verified])
+  @@index([contributedBy])
   @@map("knowledge")
 }
 
@@ -56,6 +64,11 @@ model Grievance {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  @@index([supporters])
+  @@index([status])
+  @@index([providerTarget])
+  @@index([category])
+  @@index([reportedBy])
   @@map("grievances")
 }
 
@@ -77,6 +90,8 @@ model Proposal {
   votes       Vote[]
   resolutions Resolution[]
 
+  @@index([status])
+  @@index([proposedBy])
   @@map("proposals")
 }
 
@@ -106,5 +121,6 @@ model Resolution {
   votesAgainst     Int
   status           String   @default("active") // active, superseded, repealed
 
+  @@index([passedAt])
   @@map("resolutions")
 }

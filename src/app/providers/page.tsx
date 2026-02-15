@@ -41,12 +41,21 @@ export default function ProvidersPage() {
   const [reports, setReports] = useState<ProviderReport[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState(false);
+
   useEffect(() => {
     async function fetchReports() {
-      const res = await fetch("/api/providers");
-      const data = await res.json();
-      setReports(data.data || []);
-      setLoading(false);
+      try {
+        const res = await fetch("/api/providers");
+        if (!res.ok) throw new Error("Failed to fetch");
+        const data = await res.json();
+        setReports(data.data || []);
+        setError(false);
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchReports();
   }, []);
@@ -91,7 +100,13 @@ export default function ProvidersPage() {
         </div>
       </div>
 
-      {loading ? (
+      {error && !loading && (
+        <div className="text-center py-12">
+          <p className="text-red-600 mb-2">Failed to load provider data.</p>
+          <button onClick={() => window.location.reload()} className="btn-secondary text-sm">Try again</button>
+        </div>
+      )}
+      {!error && loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="card animate-pulse">

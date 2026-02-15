@@ -54,6 +54,7 @@ export function Header() {
             onClick={() => setMobileOpen(!mobileOpen)}
             className="lg:hidden p-2 text-muted hover:text-foreground"
             aria-label="Toggle navigation"
+            aria-expanded={mobileOpen}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {mobileOpen ? (

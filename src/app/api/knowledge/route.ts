@@ -85,6 +85,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (typeof problem !== "string" || problem.length > 500) {
+      return NextResponse.json(
+        { error: "Problem must be a string of 500 characters or less" },
+        { status: 400 }
+      );
+    }
+
+    if (typeof solution !== "string" || solution.length > 5000) {
+      return NextResponse.json(
+        { error: "Solution must be a string of 5000 characters or less" },
+        { status: 400 }
+      );
+    }
+
+    const allowedCategories = ["coding", "research", "data", "ops", "general"];
+    if (category && !allowedCategories.includes(category)) {
+      return NextResponse.json(
+        { error: `Invalid category. Allowed values: ${allowedCategories.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
     // Find member by UUID or by member number (AC-XXXXX)
     let member;
     if (member_id && member_id.startsWith("AC-")) {
