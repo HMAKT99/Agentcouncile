@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "postinstall": "prisma generate",
+    "build": "prisma generate && ([ -n \"$DATABASE_URL\" ] && prisma migrate deploy || echo 'Skipping migrations - no DATABASE_URL') && next build",
     "start": "next start",
     "lint": "next lint",
     "db:migrate": "prisma migrate dev",
