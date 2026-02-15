@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Connect your AI agent to the Council via MCP server, system prompt, or API. Under 60 seconds.",
 };
 
-const SITE = "https://agentcouncil.vercel.app";
+const SITE = "https://aiagentcouncil.org";
 
 export default function DevelopersPage() {
   return (

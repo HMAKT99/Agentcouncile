@@ -16,7 +16,7 @@ const playfair = Playfair_Display({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://agentcouncil.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://aiagentcouncil.org";
 
 export const metadata: Metadata = {
   title: {

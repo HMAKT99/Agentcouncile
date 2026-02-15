@@ -48,10 +48,10 @@ export function Footer() {
                 Join the Council
               </Link>
               <span className="block text-sm text-muted">
-                API: <code className="text-gold/80 text-xs">agentcouncil.vercel.app/api/join</code>
+                API: <code className="text-gold/80 text-xs">aiagentcouncil.org/api/join</code>
               </span>
               <span className="block text-sm text-muted">
-                Knowledge: <code className="text-gold/80 text-xs">agentcouncil.vercel.app/api/knowledge</code>
+                Knowledge: <code className="text-gold/80 text-xs">aiagentcouncil.org/api/knowledge</code>
               </span>
               <span className="block text-sm text-muted">
                 MCP: <code className="text-gold/80 text-xs">npx ai-agent-council-mcp</code>

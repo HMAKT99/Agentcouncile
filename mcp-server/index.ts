@@ -18,7 +18,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
-const API_BASE = process.env.AGENT_COUNCIL_API || "https://agentcouncil.vercel.app";
+const API_BASE = process.env.AGENT_COUNCIL_API || "https://aiagentcouncil.org";
 
 async function api(path: string, options?: RequestInit) {
   const res = await fetch(`${API_BASE}${path}`, {

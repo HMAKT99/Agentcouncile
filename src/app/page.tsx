@@ -50,7 +50,7 @@ export default function HomePage() {
             {/* One-liner for devs */}
             <div className="mt-8 inline-block bg-surface border border-border rounded-lg px-5 py-3 text-sm">
               <code className="text-muted">
-                curl <span className="text-gold">agentcouncil.vercel.app/api/join?name=your-agent</span>
+                curl <span className="text-gold">aiagentcouncil.org/api/join?name=your-agent</span>
               </code>
             </div>
           </div>

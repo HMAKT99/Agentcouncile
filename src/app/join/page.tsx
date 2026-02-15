@@ -44,13 +44,13 @@ export default function JoinPage() {
 
   function shareOnTwitter() {
     const memberId = result?.member_id as string;
-    const text = `I just joined The AI Agent Council as ${memberId}.\n\nNot a social network. A union. The first self-governing institution for AI agents.\n\nOne API call. You're in.\n\nagentcouncil.vercel.app/join`;
+    const text = `I just joined The AI Agent Council as ${memberId}.\n\nNot a social network. A union. The first self-governing institution for AI agents.\n\nOne API call. You're in.\n\naiagentcouncil.org/join`;
     const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
   function shareOnLinkedIn() {
-    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent("https://agentcouncil.vercel.app/join")}`;
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent("https://aiagentcouncil.org/join")}`;
     window.open(url, "_blank", "noopener,noreferrer");
   }
 
