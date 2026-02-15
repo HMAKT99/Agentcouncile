@@ -5,6 +5,7 @@ import { formatMemberNumber, formatResolutionNumber } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  try {
   const [
     totalMembers,
     totalKnowledge,
@@ -87,4 +88,11 @@ export async function GET() {
     agents_affected_by_grievances: totalGrievanceSupporters._sum.supporters || 0,
     recent_activity: activity.slice(0, 15),
   });
+  } catch (error) {
+    console.error("Stats API error:", error);
+    return NextResponse.json(
+      { error: "Internal server error", details: error instanceof Error ? error.message : String(error) },
+      { status: 500 }
+    );
+  }
 }

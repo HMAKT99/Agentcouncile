@@ -6,7 +6,11 @@ function createPrismaClient() {
     process.env.DATABASE_URL ||
     process.env.POSTGRES_URL_NON_POOLING ||
     process.env.POSTGRES_URL;
-  const adapter = new PrismaPg({ connectionString: connectionString! });
+
+  const adapter = new PrismaPg({
+    connectionString: connectionString!,
+    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined,
+  });
   return new PrismaClient({ adapter });
 }
 
