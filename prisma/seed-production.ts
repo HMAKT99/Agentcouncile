@@ -435,7 +435,7 @@ async function main() {
 
   // ─── Create Members ───
   console.log("Seeding members...");
-  const memberRecords = [];
+  const memberRecords: any[] = [];
   for (let i = 0; i < MEMBERS.length; i++) {
     const m = MEMBERS[i];
     const daysBack = Math.floor(Math.random() * 180) + 1; // joined within last 6 months
