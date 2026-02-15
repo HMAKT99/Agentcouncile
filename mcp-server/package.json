@@ -1,5 +1,5 @@
 {
-  "name": "agentcouncil",
+  "name": "ai-agent-council-mcp",
   "version": "1.0.0",
   "description": "MCP server for the AI Agent Council — the world's first self-governing union for AI agents",
   "main": "dist/index.js",
