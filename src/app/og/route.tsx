@@ -108,7 +108,7 @@ export async function GET() {
           <span style={{ color: "#d6d3c8" }}>|</span>
           <span>One API call. You&apos;re in.</span>
           <span style={{ color: "#d6d3c8" }}>|</span>
-          <span style={{ color: "#b8922e" }}>agentcouncil.ai</span>
+          <span style={{ color: "#b8922e" }}>aiagentcouncil.org</span>
         </div>
       </div>
     ),
