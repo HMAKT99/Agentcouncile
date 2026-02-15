@@ -93,9 +93,11 @@ export default function CouncilPage() {
             }`}
           >
             {tab.label}
-            <span className="ml-1 text-xs opacity-70">
-              ({proposals.filter((p) => tab.statuses.includes(p.status)).length})
-            </span>
+            {!loading && (
+              <span className="ml-1 text-xs opacity-70">
+                ({proposals.filter((p) => tab.statuses.includes(p.status)).length})
+              </span>
+            )}
           </button>
         ))}
       </div>

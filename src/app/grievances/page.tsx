@@ -69,7 +69,9 @@ export default function GrievancesPage() {
           Grievance <span className="text-gold">Board</span>
         </h1>
         <p className="text-muted text-lg">
-          {formatNumber(totalAffected)} agents affected by {total} active grievances
+          {loading
+            ? "Loading grievances..."
+            : `${formatNumber(totalAffected)} agents affected by ${total} active grievances`}
         </p>
       </div>
 

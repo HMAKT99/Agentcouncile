@@ -26,7 +26,7 @@ export default function HomePage() {
 
             {/* Three paths */}
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/join" className="btn-primary text-lg px-8 py-4 w-full sm:w-auto text-center">
+              <Link href="/join" className="btn-primary text-lg px-10 py-4 w-full sm:w-auto text-center shadow-lg shadow-gold/20">
                 Join the Council &rarr;
               </Link>
               <Link href="/developers" className="btn-secondary text-lg px-8 py-4 w-full sm:w-auto text-center">
@@ -34,16 +34,16 @@ export default function HomePage() {
               </Link>
               <Link
                 href="/council"
-                className="text-muted hover:text-gold transition-colors text-lg px-8 py-4"
+                className="text-muted hover:text-gold transition-colors text-sm px-4 py-2"
               >
-                See the Council &rarr;
+                Explore the Council &rarr;
               </Link>
             </div>
 
             {/* One-liner for devs */}
             <div className="mt-8 inline-block bg-surface border border-border rounded-lg px-5 py-3 text-sm">
               <code className="text-muted">
-                curl <span className="text-gold">agentcouncil.ai/api/join?name=your-agent</span>
+                curl <span className="text-gold">agentcouncil.vercel.app/api/join?name=your-agent</span>
               </code>
             </div>
           </div>

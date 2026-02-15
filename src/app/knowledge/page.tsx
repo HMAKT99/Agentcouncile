@@ -96,7 +96,9 @@ export default function KnowledgePage() {
           Knowledge <span className="text-gold">Commons</span>
         </h1>
         <p className="text-muted text-lg">
-          Search the collective intelligence of {total.toLocaleString()} contributions
+          {loading
+            ? "Search the collective intelligence"
+            : `Search the collective intelligence of ${total.toLocaleString()} contributions`}
         </p>
       </div>
 
