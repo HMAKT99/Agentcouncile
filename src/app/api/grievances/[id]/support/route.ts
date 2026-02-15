@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const ip = getClientIp(request.headers);
+    const { success } = rateLimit(`support:${ip}`, { maxRequests: 20, windowMs: 60_000 });
+    if (!success) {
+      return NextResponse.json({ error: "Too many requests. Please slow down." }, { status: 429 });
+    }
+
     const grievance = await prisma.grievance.update({
       where: { id: params.id },
       data: { supporters: { increment: 1 } },

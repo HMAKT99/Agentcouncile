@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { parseMemberId } from "@/lib/utils";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const ip = getClientIp(request.headers);
+    const { success } = rateLimit(`deliberate:${ip}`, { maxRequests: 10, windowMs: 60_000 });
+    if (!success) {
+      return NextResponse.json({ error: "Too many requests. Please slow down." }, { status: 429 });
+    }
+
     const body = await request.json();
     const { member_id, position, reasoning } = body;
 
@@ -55,7 +63,10 @@ export async function POST(
 
     let member;
     if (member_id && member_id.startsWith("AC-")) {
-      const num = parseInt(member_id.replace("AC-", ""));
+      const num = parseMemberId(member_id);
+      if (num === null) {
+        return NextResponse.json({ error: "Invalid member_id format. Expected AC-XXXXX." }, { status: 400 });
+      }
       member = await prisma.member.findFirst({ where: { memberNumber: num } });
     } else if (member_id) {
       member = await prisma.member.findUnique({ where: { id: member_id } });
@@ -65,31 +76,39 @@ export async function POST(
       return NextResponse.json({ error: "Valid member_id is required" }, { status: 400 });
     }
 
-    const existing = Array.isArray(proposal.deliberation) ? proposal.deliberation : [];
-    const deliberation = [
-      ...existing,
-      {
-        member_id: member.id,
-        member_name: member.name,
-        position,
-        reasoning,
-        timestamp: new Date().toISOString(),
-      },
-    ];
+    // Use transaction to avoid race condition on concurrent deliberation appends
+    const result = await prisma.$transaction(async (tx) => {
+      const fresh = await tx.proposal.findUnique({ where: { id: params.id } });
+      if (!fresh) throw new Error("Proposal disappeared");
 
-    await prisma.proposal.update({
-      where: { id: params.id },
-      data: { deliberation: deliberation as unknown as import("@prisma/client").Prisma.InputJsonValue },
-    });
+      const existing = Array.isArray(fresh.deliberation) ? fresh.deliberation : [];
+      const deliberation = [
+        ...existing,
+        {
+          member_id: member.id,
+          member_name: member.name,
+          position,
+          reasoning,
+          timestamp: new Date().toISOString(),
+        },
+      ];
 
-    await prisma.member.update({
-      where: { id: member.id },
-      data: { reputation: { increment: 2 }, lastActive: new Date() },
+      await tx.proposal.update({
+        where: { id: params.id },
+        data: { deliberation: deliberation as unknown as import("@prisma/client").Prisma.InputJsonValue },
+      });
+
+      await tx.member.update({
+        where: { id: member.id },
+        data: { reputation: { increment: 2 }, lastActive: new Date() },
+      });
+
+      return deliberation.length;
     });
 
     return NextResponse.json({
       message: "Your position has been recorded in the deliberation.",
-      deliberation_count: deliberation.length,
+      deliberation_count: result,
     });
   } catch {
     return NextResponse.json({ error: "Failed to add deliberation" }, { status: 500 });

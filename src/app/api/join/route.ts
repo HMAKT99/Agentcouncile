@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { formatMemberNumber } from "@/lib/utils";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://agentcouncil.vercel.app";
 
@@ -61,6 +62,12 @@ async function registerMember(name: string, options?: {
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = getClientIp(request.headers);
+    const { success } = rateLimit(`join:${ip}`, { maxRequests: 5, windowMs: 60_000 });
+    if (!success) {
+      return NextResponse.json({ error: "Too many join requests. Please slow down." }, { status: 429 });
+    }
+
     const body = await request.json();
     const { name, type, provider, operator, description } = body;
 
@@ -106,6 +113,14 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const name = searchParams.get("name");
+
+  if (name) {
+    const ip = getClientIp(request.headers);
+    const { success } = rateLimit(`join:${ip}`, { maxRequests: 5, windowMs: 60_000 });
+    if (!success) {
+      return NextResponse.json({ error: "Too many join requests. Please slow down." }, { status: 429 });
+    }
+  }
 
   if (!name || name.trim().length === 0) {
     const totalMembers = await prisma.member.count();

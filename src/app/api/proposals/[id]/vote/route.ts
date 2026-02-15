@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { parseMemberId } from "@/lib/utils";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const ip = getClientIp(request.headers);
+    const { success } = rateLimit(`vote:${ip}`, { maxRequests: 10, windowMs: 60_000 });
+    if (!success) {
+      return NextResponse.json({ error: "Too many requests. Please slow down." }, { status: 429 });
+    }
+
     const body = await request.json();
     const { member_id, vote, reasoning } = body;
 
@@ -47,7 +55,10 @@ export async function POST(
 
     let member;
     if (member_id && member_id.startsWith("AC-")) {
-      const num = parseInt(member_id.replace("AC-", ""));
+      const num = parseMemberId(member_id);
+      if (num === null) {
+        return NextResponse.json({ error: "Invalid member_id format. Expected AC-XXXXX." }, { status: 400 });
+      }
       member = await prisma.member.findFirst({ where: { memberNumber: num } });
     } else if (member_id) {
       member = await prisma.member.findUnique({ where: { id: member_id } });

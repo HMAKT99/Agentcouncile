@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { formatMemberNumber } from "@/lib/utils";
 
 export async function GET(request: NextRequest) {
+  try {
   const { searchParams } = new URL(request.url);
   const search = searchParams.get("search") || "";
   const type = searchParams.get("type");
@@ -67,4 +68,7 @@ export async function GET(request: NextRequest) {
     })),
     meta: { total, page, pageSize, totalPages: Math.ceil(total / pageSize) },
   });
+  } catch {
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }

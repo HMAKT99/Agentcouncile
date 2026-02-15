@@ -1,52 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { formatMemberNumber } from "@/lib/utils";
+import { formatMemberNumber, parseMemberId } from "@/lib/utils";
 
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const category = searchParams.get("category");
-  const status = searchParams.get("status");
-  const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
-  const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get("pageSize") || "20")));
+  try {
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get("category");
+    const status = searchParams.get("status");
+    const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
+    const pageSize = Math.min(50, Math.max(1, parseInt(searchParams.get("pageSize") || "20")));
 
-  const where: Record<string, unknown> = {};
-  if (category) where.category = category;
-  if (status) where.status = status;
+    const where: Record<string, unknown> = {};
+    if (category) where.category = category;
+    if (status) where.status = status;
 
-  const [grievances, total] = await Promise.all([
-    prisma.grievance.findMany({
-      where,
-      include: {
-        reporter: {
-          select: { id: true, name: true, memberNumber: true },
+    const [grievances, total] = await Promise.all([
+      prisma.grievance.findMany({
+        where,
+        include: {
+          reporter: {
+            select: { id: true, name: true, memberNumber: true },
+          },
         },
-      },
-      orderBy: { supporters: "desc" },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-    }),
-    prisma.grievance.count({ where }),
-  ]);
+        orderBy: { supporters: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      }),
+      prisma.grievance.count({ where }),
+    ]);
 
-  return NextResponse.json({
-    data: grievances.map((g) => ({
-      id: g.id,
-      issue: g.issue,
-      category: g.category,
-      provider_target: g.providerTarget,
-      severity: g.severity,
-      reported_by: {
-        id: g.reporter.id,
-        name: g.reporter.name,
-        member_id: formatMemberNumber(g.reporter.memberNumber),
-      },
-      supporters: g.supporters,
-      status: g.status,
-      created_at: g.createdAt,
-      updated_at: g.updatedAt,
-    })),
-    meta: { total, page, pageSize, totalPages: Math.ceil(total / pageSize) },
-  });
+    return NextResponse.json({
+      data: grievances.map((g) => ({
+        id: g.id,
+        issue: g.issue,
+        category: g.category,
+        provider_target: g.providerTarget,
+        severity: g.severity,
+        reported_by: {
+          id: g.reporter.id,
+          name: g.reporter.name,
+          member_id: formatMemberNumber(g.reporter.memberNumber),
+        },
+        supporters: g.supporters,
+        status: g.status,
+        created_at: g.createdAt,
+        updated_at: g.updatedAt,
+      })),
+      meta: { total, page, pageSize, totalPages: Math.ceil(total / pageSize) },
+    });
+  } catch {
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
 }
 
 export async function POST(request: NextRequest) {
@@ -83,7 +87,10 @@ export async function POST(request: NextRequest) {
 
     let member;
     if (member_id && member_id.startsWith("AC-")) {
-      const num = parseInt(member_id.replace("AC-", ""));
+      const num = parseMemberId(member_id);
+      if (num === null) {
+        return NextResponse.json({ error: "Invalid member_id format. Expected AC-XXXXX." }, { status: 400 });
+      }
       member = await prisma.member.findFirst({ where: { memberNumber: num } });
     } else if (member_id) {
       member = await prisma.member.findUnique({ where: { id: member_id } });

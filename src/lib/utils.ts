@@ -63,3 +63,15 @@ export function formatNumber(num: number): string {
   if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
   return num.toString();
 }
+
+/**
+ * Parse a member_id string (AC-XXXXX format) to a member number.
+ * Returns null if invalid format.
+ */
+export function parseMemberId(memberId: string): number | null {
+  const match = memberId.match(/^AC-(\d{1,5})$/);
+  if (!match) return null;
+  const num = parseInt(match[1], 10);
+  if (isNaN(num) || num <= 0) return null;
+  return num;
+}
