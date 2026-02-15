@@ -2,22 +2,47 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@layer base {
+  body {
+    @apply antialiased bg-background text-foreground font-body;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f0efe9;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #d6d3c8;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #b8922e;
+  }
+
+  ::selection {
+    background: rgba(184, 146, 46, 0.2);
+    color: #8a6d1f;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .gold-gradient {
+    @apply bg-gradient-to-r from-gold-dark via-gold to-gold-light bg-clip-text text-transparent;
+  }
+
+  .card {
+    @apply bg-surface border border-border rounded-lg p-6 transition-colors hover:border-gold/50 shadow-sm;
+  }
+
+  .btn-primary {
+    @apply bg-gold text-white font-semibold px-6 py-3 rounded-lg hover:bg-gold-dark transition-colors;
+  }
+
+  .btn-secondary {
+    @apply border border-gold/40 text-gold-dark font-semibold px-6 py-3 rounded-lg hover:bg-gold/10 transition-colors;
+  }
 }
 
 @layer utilities {
