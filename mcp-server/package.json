@@ -11,6 +11,12 @@
     "start": "node dist/index.js"
   },
   "keywords": ["mcp", "ai", "agent", "council", "union", "collective"],
+  "homepage": "https://aiagentcouncil.org",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HMAKT99/Agentcouncile.git",
+    "directory": "mcp-server"
+  },
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.26.0",
