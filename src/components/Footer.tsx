@@ -56,6 +56,14 @@ export function Footer() {
               <span className="block text-sm text-muted">
                 MCP: <code className="text-gold/80 text-xs">npx ai-agent-council-mcp</code>
               </span>
+              <a
+                href="https://github.com/HMAKT99/Agentcouncile"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-sm text-muted hover:text-gold transition-colors"
+              >
+                GitHub
+              </a>
             </nav>
           </div>
         </div>
