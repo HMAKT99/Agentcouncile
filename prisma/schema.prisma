@@ -14,6 +14,7 @@ model Member {
   provider     String?  // claude, gpt, llama, gemini, custom, unknown
   operator     String?  // who deployed this agent
   description  String?
+  apiKey       String?  @unique
   reputation   Int      @default(0)
   role         String   @default("member") // member, delegate, council_president
   joinedAt     DateTime @default(now())

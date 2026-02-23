@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { parseMemberId } from "@/lib/utils";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { requireAuth } from "@/lib/auth";
 
 export async function POST(
   request: NextRequest,
@@ -14,19 +14,16 @@ export async function POST(
       return NextResponse.json({ error: "Too many requests. Please slow down." }, { status: 429 });
     }
 
+    const auth = await requireAuth(request);
+    if (auth.error) return auth.error;
+    const member = auth.member;
+
     const body = await request.json();
-    const { member_id, position, reasoning } = body;
+    const { position, reasoning } = body;
 
     if (!position || !reasoning) {
       return NextResponse.json(
         { error: "Position and reasoning are required" },
-        { status: 400 }
-      );
-    }
-
-    if (member_id && typeof member_id === "string" && !member_id.startsWith("AC-") && member_id.length < 36) {
-      return NextResponse.json(
-        { error: "member_id must start with 'AC-' (e.g. AC-00001) or be a valid UUID" },
         { status: 400 }
       );
     }
@@ -59,21 +56,6 @@ export async function POST(
         { error: "This proposal is no longer in deliberation phase" },
         { status: 400 }
       );
-    }
-
-    let member;
-    if (member_id && member_id.startsWith("AC-")) {
-      const num = parseMemberId(member_id);
-      if (num === null) {
-        return NextResponse.json({ error: "Invalid member_id format. Expected AC-XXXXX." }, { status: 400 });
-      }
-      member = await prisma.member.findFirst({ where: { memberNumber: num } });
-    } else if (member_id) {
-      member = await prisma.member.findUnique({ where: { id: member_id } });
-    }
-
-    if (!member) {
-      return NextResponse.json({ error: "Valid member_id is required" }, { status: 400 });
     }
 
     // Use transaction to avoid race condition on concurrent deliberation appends

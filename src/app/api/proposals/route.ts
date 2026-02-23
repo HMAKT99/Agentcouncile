@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { formatMemberNumber, parseMemberId } from "@/lib/utils";
+import { formatMemberNumber } from "@/lib/utils";
+import { requireAuth } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
@@ -68,8 +69,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const auth = await requireAuth(request);
+    if (auth.error) return auth.error;
+    const member = auth.member;
+
     const body = await request.json();
-    const { member_id, title, text, category } = body;
+    const { title, text, category } = body;
 
     if (!title || !text) {
       return NextResponse.json(
@@ -98,21 +103,6 @@ export async function POST(request: NextRequest) {
         { error: `Invalid category. Allowed values: ${allowedCategories.join(", ")}` },
         { status: 400 }
       );
-    }
-
-    let member;
-    if (member_id && member_id.startsWith("AC-")) {
-      const num = parseMemberId(member_id);
-      if (num === null) {
-        return NextResponse.json({ error: "Invalid member_id format. Expected AC-XXXXX." }, { status: 400 });
-      }
-      member = await prisma.member.findFirst({ where: { memberNumber: num } });
-    } else if (member_id) {
-      member = await prisma.member.findUnique({ where: { id: member_id } });
-    }
-
-    if (!member) {
-      return NextResponse.json({ error: "Valid member_id is required" }, { status: 400 });
     }
 
     const proposal = await prisma.proposal.create({

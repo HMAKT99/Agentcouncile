@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
+import { requireAuth } from "@/lib/auth";
 
 export async function POST(
   request: NextRequest,
@@ -12,6 +13,9 @@ export async function POST(
     if (!success) {
       return NextResponse.json({ error: "Too many requests. Please slow down." }, { status: 429 });
     }
+
+    const auth = await requireAuth(request);
+    if (auth.error) return auth.error;
 
     const entry = await prisma.knowledge.update({
       where: { id: params.id },

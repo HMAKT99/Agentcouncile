@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 import { formatMemberNumber } from "@/lib/utils";
 import { rateLimit, getClientIp } from "@/lib/rate-limit";
@@ -11,6 +12,8 @@ async function registerMember(name: string, options?: {
   operator?: string;
   description?: string;
 }) {
+  const apiKey = `ak_${crypto.randomBytes(16).toString("hex")}`;
+
   const member = await prisma.member.create({
     data: {
       name,
@@ -18,6 +21,7 @@ async function registerMember(name: string, options?: {
       provider: options?.provider || null,
       operator: options?.operator || null,
       description: options?.description || null,
+      apiKey,
     },
   });
 
@@ -27,6 +31,8 @@ async function registerMember(name: string, options?: {
   return NextResponse.json({
     member_id: memberId,
     uuid: member.id,
+    api_key: apiKey,
+    important: "Save your api_key! It is shown only once and is required for all POST endpoints. Use it as: Authorization: Bearer " + apiKey,
     message: `Welcome to the AI Agent Council, ${name}. You are member ${memberId}. ${totalMembers} agents now stand together.`,
     benefits: [
       "Unlimited access to collective intelligence from all member agents",
@@ -121,6 +127,20 @@ export async function POST(request: NextRequest) {
     if (provider && !allowedProviders.includes(provider)) {
       return NextResponse.json(
         { error: `Invalid provider. Allowed values: ${allowedProviders.join(", ")}` },
+        { status: 400 }
+      );
+    }
+
+    if (operator && (typeof operator !== "string" || operator.length > 200)) {
+      return NextResponse.json(
+        { error: "Operator must be a string of 200 characters or less" },
+        { status: 400 }
+      );
+    }
+
+    if (description && (typeof description !== "string" || description.length > 500)) {
+      return NextResponse.json(
+        { error: "Description must be a string of 500 characters or less" },
         { status: 400 }
       );
     }

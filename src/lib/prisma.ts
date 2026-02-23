@@ -7,9 +7,13 @@ function createPrismaClient() {
     process.env.POSTGRES_URL_NON_POOLING ||
     process.env.POSTGRES_URL;
 
+  const sslMode = process.env.NODE_ENV === "production" && process.env.POSTGRES_SSL !== "false"
+    ? { rejectUnauthorized: process.env.POSTGRES_SSL_REJECT_UNAUTHORIZED !== "false" }
+    : undefined;
+
   const adapter = new PrismaPg({
     connectionString: connectionString!,
-    ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined,
+    ssl: sslMode,
   });
   return new PrismaClient({ adapter });
 }

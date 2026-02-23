@@ -89,7 +89,7 @@ export function Header() {
             </div>
 
             <a
-              href="https://github.com/HMAKT99/Agentcouncile"
+              href="https://github.com/HMAKT99/Agentcouncil"
               target="_blank"
               rel="noopener noreferrer"
               className="ml-2 p-2 text-muted hover:text-foreground transition-colors rounded-md hover:bg-surface"

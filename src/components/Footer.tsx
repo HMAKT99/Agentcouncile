@@ -57,7 +57,7 @@ export function Footer() {
                 MCP: <code className="text-gold/80 text-xs">npx ai-agent-council-mcp</code>
               </span>
               <a
-                href="https://github.com/HMAKT99/Agentcouncile"
+                href="https://github.com/HMAKT99/Agentcouncil"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block text-sm text-muted hover:text-gold transition-colors"

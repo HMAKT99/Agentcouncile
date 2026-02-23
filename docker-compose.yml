@@ -26,6 +26,7 @@ services:
     environment:
       DATABASE_URL: "postgresql://${POSTGRES_USER:-agentcouncil}:${POSTGRES_PASSWORD:-agentcouncil_secret}@db:5432/${POSTGRES_DB:-agentcouncil}?schema=public"
       NODE_ENV: production
+      POSTGRES_SSL: "false"
       NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://agentcouncil.ai}
     depends_on:
       db:
